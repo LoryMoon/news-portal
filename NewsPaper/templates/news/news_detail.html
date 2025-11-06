@@ -1,0 +1,23 @@
+{% extends 'flatpages/default.html' %}
+
+{% load custom_filters %}
+
+{% block title %}
+{{ news.title|censor }}
+{% endblock title %}
+
+{% block content %}
+    <h2>{{ news.title|censor }}</h2>
+
+    <p><strong>Дата публикации:</strong> {{ news.created_at|date:'d.m.Y' }}</p>
+
+    <hr>
+
+
+    {{ news.content|censor|linebreaks }}
+
+
+
+    <a href="{% url 'news_list' %}">Назад к списку новостей</a>
+
+{% endblock content %}
