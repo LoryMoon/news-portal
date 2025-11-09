@@ -4,15 +4,20 @@
 {% load custom_tags %}
 
 {% block title %}
-Список новостей
+Поиск новостей
 {% endblock title %}
 
 {% block content %}
-    <h1>Все новости</h1>
+    <h1>Поиск новостей</h1>
 
-    <h3>Всего новостей: {{ paginator.count }}</h3>
+    <form action="" method="get">
+        {{ filterset.form.as_p }}
+        <input type="submit" value="Найти" />
+    </form>
 
     <hr>
+
+    <h3>Результаты поиска: {{ news_list|length }}</h3>
 
     {% if news_list %}
         <table>
@@ -37,31 +42,34 @@
             {% endfor %}
         </table>
     {% else %}
-        <h2>Новостей нет!</h2>
+        <h2>Новостей не найдено!</h2>
     {% endif %}
 
     {% if page_obj.has_previous %}
-        <a href="?page=1">1</a>
+        <a href="?{% url_replace page=1 %}">1</a>
         {% if page_obj.previous_page_number != 1 %}
             ...
-            <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+            <a href="?{% url_replace page=page_obj.previous_page_number %}">
+                {{ page_obj.previous_page_number }}
+            </a>
         {% endif %}
     {% endif %}
 
     {{ page_obj.number }}
 
     {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+        <a href="?{% url_replace page=page_obj.next_page_number %}">
+            {{ page_obj.next_page_number }}
+        </a>
         {% if paginator.num_pages != page_obj.next_page_number %}
             ...
-            <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+            <a href="?{% url_replace page=page_obj.paginator.num_pages %}">
+                {{ page_obj.paginator.num_pages }}
+            </a>
         {% endif %}
     {% endif %}
-
     <hr>
-    <a href="{% url 'news_search' %}">Поиск новостей</a> |
-    <a href="{% url 'news_create' %}">Создать новость</a> |
-    <a href="{% url 'article_create' %}">Создать статью</a> |
+    <a href="{% url 'news_list' %}"> к списку новостей</a>
 
 
 {% endblock content %}
