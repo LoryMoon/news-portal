@@ -1,0 +1,66 @@
+{% extends 'flatpages/default.html' %}
+
+{% load custom_filters %}
+{% load custom_tags %}
+
+{% block title %}
+Поиск новостей
+{% endblock title %}
+
+{% block content %}
+   <h1>Поиск новостей и статей</h1>
+
+   <form action="" method="get">
+       {{ filterset.form.as_p }}
+       <input type="submit" value="Найти" />
+   </form>
+
+   <hr>
+   {% if posts %}
+       <table>
+           <tr>
+               <td><strong>Заголовок</strong></td>
+               <td><strong>Дата</strong></td>
+               <td><strong>Текст</strong></td>
+               <td><strong>Тип</strong></td>
+               <td><strong>Рейтинг</strong></td>
+           </tr>
+
+           {% for post in posts %}
+           <tr>
+               <td>
+                   <a href="{% url 'news_detail' post.id %}">>
+                       {{ post.title|censor }}
+                   </a>
+               </td>
+               <td>{{ post.created_at|date:"d.m.Y" }}</td>
+               <td>{{ post.content|truncatechars:20|censor }}</td>
+               <td>{{ post.get_post_type_display }}</td>
+               <td>{{ post.rating }}</td>
+           </tr>
+           {% endfor %}
+
+       </table>
+   {% else %}
+       <h2>Новостей и статей нет!</h2>
+   {% endif %}
+
+   {% if page_obj.has_previous %}
+       <a href="?{% url_replace page=1 %}">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {{ page_obj.number }}
+
+   {% if page_obj.has_next %}
+       <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
+{% endblock content %}

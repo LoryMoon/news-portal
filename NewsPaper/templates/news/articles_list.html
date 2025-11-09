@@ -1,0 +1,75 @@
+{% extends 'flatpages/default.html' %}
+
+{% load custom_filters %}
+
+{% block title %}
+Статьи
+{% endblock title %}
+
+{% block content %}
+    <h1>Все статьи</h1>
+    <h3>Всего статей: {{ articles_list|length }}</h3>
+
+    <hr>
+
+    {% if articles_list %}
+        <table>
+            <tr>
+                <td><strong>Заголовок</strong></td>
+                <td><strong>Дата</strong></td>
+                <td><strong>Текст</strong></td>
+                <td><strong>Рейтинг</strong></td>
+                <td><strong>Действия</strong></td>
+            </tr>
+
+            {% for article in articles_list %}
+            <tr>
+                <td>
+                    <a href="{% url 'article_detail' article.id %}">
+                        {{ article.title|censor }}
+                    </a>
+                </td>
+                <td>{{ article.created_at|date:'d.m.Y' }}</td>
+                <td>{{ article.content|truncatewords:20|censor }}</td>
+                <td>{{ article.rating }}</td>
+                <td>
+                    <a href="{% url 'article_edit' article.id %}">✏️</a>
+                    <a href="{% url 'article_delete' article.id %}">🗑️</a>
+                </td>
+            </tr>
+            {% endfor %}
+
+        </table>
+    {% else %}
+        <h2>Статей нет!</h2>
+    {% endif %}
+
+    <!-- Пагинация -->
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">Первая</a>
+            <a href="?page={{ page_obj.previous_page_number }}">←</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <strong>{{ num }}</strong>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">→</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+        {% endif %}
+    </div>
+
+    <br><br>
+    <div>
+        <a href="{% url 'article_create' %}">➕ Добавить статью</a>
+        <a href="{% url 'post_search' %}" style="margin-left: 20px;">🔍 Поиск</a>
+        <a href="{% url 'news_list' %}" style="margin-left: 20px;">📰 К новостям</a>
+    </div>
+
+{% endblock content %}
