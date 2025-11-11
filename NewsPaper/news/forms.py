@@ -1,6 +1,9 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import Post
+from allauth.account.forms import SignupForm
+from django.contrib.auth.models import Group
+
 
 
 class NewsForm(forms.ModelForm):
@@ -43,3 +46,10 @@ class ArticleForm(forms.ModelForm):
         if len(content) < 50:
             raise ValidationError("Текст статьи должен содержать не менее 50 символов.")
         return content
+
+class CustomSignupForm(SignupForm):
+    def save(self, request):
+        user = super().save(request)
+        common_group = Group.objects.get(name='common')
+        common_group.user_set.add(user)
+        return user

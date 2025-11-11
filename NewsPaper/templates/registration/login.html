@@ -1,0 +1,35 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+<h2>Вход в систему</h2>
+
+{% if form.errors %}
+    <p>Ваше имя пользователя и пароль не совпали. Пожалуйста, попробуйте еще раз.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+        <p>У вашей учетной записи нет доступа к этой странице.</p>
+    {% else %}
+        <p>Пожалуйста, войдите, чтобы увидеть эту страницу.</p>
+    {% endif %}
+{% endif %}
+
+<form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td>{{ form.username.label_tag }}</td>
+            <td>{{ form.username }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.password.label_tag }}</td>
+            <td>{{ form.password }}</td>
+        </tr>
+    </table>
+    <input type="submit" value="Войти" />
+    <input type="hidden" name="next" value="{{ next }}" />
+</form>
+
+<p><a href="{% url 'news_list' %}">Вернуться на главную</a></p>
+{% endblock %}

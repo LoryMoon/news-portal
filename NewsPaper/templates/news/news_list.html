@@ -58,10 +58,25 @@
         {% endif %}
     {% endif %}
 
-    <hr>
-    <a href="{% url 'news_search' %}">Поиск новостей</a> |
-    <a href="{% url 'news_create' %}">Создать новость</a> |
-    <a href="{% url 'article_create' %}">Создать статью</a> |
+{% if user.is_authenticated and is_not_author %}
+    <div style="text-align: center; margin: 20px 0;">
+        <a href="{% url 'become_author' %}">
+            Стать автором
+        </a>
+        <p class="text-muted">Станьте автором, чтобы создавать новости и статьи!</p>
+    </div>
+{% elif user.is_authenticated %}
+    <div style="text-align: center; margin: 20px 0;">
+        <span class="badge badge-success">Вы автор</span>
+        <p class="text-muted">Вы можете создавать и редактировать новости и статьи</p>
+        <div style="margin-top: 10px;">
+            <a href="{% url 'news_create' %}">Создать новость</a>
+            <a href="{% url 'article_create' %}">Создать статью</a>
+        </div>
+    </div>
+{% endif %}
 
+    <hr>
+    <a href="{% url 'news_search' %}">Поиск новостей</a>
 
 {% endblock content %}

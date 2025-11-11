@@ -6,6 +6,7 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>Bare - Start Bootstrap Template</title>
+
         <!-- Favicon-->
         {% load static %}
         <!-- Core theme CSS (includes Bootstrap)-->
@@ -34,6 +35,20 @@
                </li>  -->
 
            </ul>
+
+           <div style="color: white; margin-right: 20px;">
+    {% if user.is_authenticated %}
+        Добро пожаловать, {{ user.username }}!
+        {% if user.groups.all %}
+            <small>({% for group in user.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% endfor %})</small>
+        {% endif %}
+        <a href="{% url 'account_logout' %}" style="color: #ffc107; margin-left: 10px;">Выйти</a>
+    {% else %}
+        <a href="{% url 'account_login' %}" style="color: #ffc107; margin-right: 10px;">Войти</a>
+        <a href="{% url 'account_signup' %}" style="color: #ffc107;">Регистрация</a>
+    {% endif %}
+</div>
+
        </div>
    </div>
 </nav>
