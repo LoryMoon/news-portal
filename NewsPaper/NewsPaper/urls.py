@@ -18,12 +18,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import handler403
+from django.views.generic import TemplateView
+
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('pages/', include('django.contrib.flatpages.urls')),
     path('news/', include('news.urls')),
     path('accounts/', include('allauth.urls')),
+    path('debug-signup/', TemplateView.as_view(template_name='debug_signup.html'), name='debug_signup'),
 ]
-
 handler403 = 'news.views.custom_permission_denied'

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%); color: white; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9f9f9; padding: 25px; border-radius: 0 0 10px 10px; }
+        .post-item { background: white; padding: 15px; margin: 12px 0; border-radius: 8px; border-left: 4px solid #4ECDC4; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .button { display: inline-block; background: #4ECDC4; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 5px 0; font-size: 14px; }
+        .category-badge { background: #FF6B6B; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+        .stats { background: #e7f3ff; padding: 15px; border-radius: 8px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Еженедельная подборка статей</h1>
+            <p>Самые интересные материалы за неделю</p>
+        </div>
+
+        <div class="content">
+            <h2>Здравствуйте, {{ user.username }}! 👋</h2>
+
+            <div class="stats">
+                <h3>В категории <span class="category-badge">{{ category.name }}</span></h3>
+                <p>За последнюю неделю появилось <strong>{{ posts|length }}</strong> новых статей:</p>
+            </div>
+
+            {% for post in posts %}
+            <div class="post-item">
+                <h3 style="margin-top: 0; color: #2c3e50;">{{ post.title }}</h3>
+                <p style="color: #666; font-size: 14px;">
+                    📅 {{ post.created_at|date:"d.m.Y" }} |
+                    ✍️ {{ post.author.user.username }} |
+                    ⭐ Рейтинг: {{ post.rating }}
+                </p>
+                <p>{{ post.content|truncatechars:200 }}</p>
+                <a href="http://{{ domain }}{% url 'news_detail' post.id %}" class="button">
+                    📖 Читать статью
+                </a>
+            </div>
+            {% endfor %}
+
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="http://{{ domain }}/news/" class="button" style="background: #667eea;">
+                    📚 Все новости на сайте
+                </a>
+            </div>
+
+            <hr style="margin: 25px 0;">
+
+            <div style="font-size: 12px; color: #666;">
+                <p><strong>💡 Хотите изменить настройки подписки?</strong><br>
+                Перейдите в <a href="http://{{ domain }}/news/">раздел категорий</a> на нашем сайте.</p>
+
+                <p>Это письмо отправлено автоматически. Пожалуйста, не отвечайте на него.<br>
+                Если вы не хотите получать такие уведомления, отпишитесь от категории на сайте.</p>
+            </div>
+
+            <p style="text-align: center; color: #999; font-size: 11px; margin-top: 20px;">
+                С уважением, команда NewsPortal<br>
+                Следите за обновлениями! 🚀
+            </p>
+        </div>
+    </div>
+</body>
+</html>

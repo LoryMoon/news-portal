@@ -9,10 +9,43 @@
 
 {% block content %}
     <h1>Все новости</h1>
-
     <h3>Всего новостей: {{ paginator.count }}</h3>
-
     <hr>
+
+    <!-- БЛОК КАТЕГОРИЙ И ПОДПИСОК -->
+    {% if categories %}
+    <div class="categories">
+        <h3>Категории новостей</h3>
+        <div>
+            {% for category in categories %}
+            <div class="category-item">
+                <span>{{ category.name }}</span>
+                {% if user.is_authenticated %}
+                    {% if category.id in subscribed_categories %}
+                        <a href="{% url 'unsubscribe_category' category.id %}">Отписаться</a>
+                    {% else %}
+                        <a href="{% url 'subscribe_category' category.id %}">Подписаться</a>
+                    {% endif %}
+                {% else %}
+                    <span>Войдите для подписки</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if user.is_authenticated and subscribed_categories %}
+        <div>
+            <strong>Ваши подписки:</strong>
+            {% for category in categories %}
+                {% if category.id in subscribed_categories %}
+                <span>{{ category.name }}</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    <hr>
+    {% endif %}
 
     {% if news_list %}
         <table>
@@ -40,6 +73,7 @@
         <h2>Новостей нет!</h2>
     {% endif %}
 
+    <!-- Пагинация -->
     {% if page_obj.has_previous %}
         <a href="?page=1">1</a>
         {% if page_obj.previous_page_number != 1 %}
@@ -58,23 +92,42 @@
         {% endif %}
     {% endif %}
 
-{% if user.is_authenticated and is_not_author %}
-    <div style="text-align: center; margin: 20px 0;">
-        <a href="{% url 'become_author' %}">
-            Стать автором
-        </a>
-        <p class="text-muted">Станьте автором, чтобы создавать новости и статьи!</p>
-    </div>
-{% elif user.is_authenticated %}
-    <div style="text-align: center; margin: 20px 0;">
-        <span class="badge badge-success">Вы автор</span>
-        <p class="text-muted">Вы можете создавать и редактировать новости и статьи</p>
-        <div style="margin-top: 10px;">
-            <a href="{% url 'news_create' %}">Создать новость</a>
-            <a href="{% url 'article_create' %}">Создать статью</a>
+    <!-- Блок автора -->
+{% if user.is_authenticated %}
+        {% if is_not_author %}
+        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+            <a href="{% url 'become_author' %}">
+                Стать автором
+            </a>
+            <p>Станьте автором, чтобы создавать новости и статьи!</p>
         </div>
-    </div>
-{% endif %}
+        {% else %}
+        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+            <span style="color: green;">✓ Вы автор</span>
+            <p>Вы можете создавать и редактировать новости и статьи</p>
+
+            <!-- Информация об ограничениях -->
+            <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                <strong>Ограничения публикации:</strong><br>
+                • Не более 3 новостей в сутки<br>
+                • Не более 5 статей в сутки
+            </div>
+
+             {% if user_news_count is not None and user_articles_count is not None %}
+            <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                <strong>Ваши публикации сегодня:</strong><br>
+                • Новостей: {{ user_news_count }}/3<br>
+                • Статей: {{ user_articles_count }}/5
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 10px;">
+                <a href="{% url 'news_create' %}"> Создать новость</a> |
+                <a href="{% url 'article_create' %}"> Создать статью</a>
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
 
     <hr>
     <a href="{% url 'news_search' %}">Поиск новостей</a>

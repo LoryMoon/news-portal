@@ -1,0 +1,16 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Email Confirmed" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <h1>{% trans "Email Confirmed" %}</h1>
+        <p>{% trans "Your email has been successfully confirmed." %}</p>
+        <p>{% trans "You can now enjoy all features of NewsPortal." %}</p>
+        <a href="/news/" class="btn btn-primary">{% trans "Go to News" %}</a>
+    </div>
+</div>
+{% endblock %}
