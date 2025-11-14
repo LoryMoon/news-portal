@@ -15,6 +15,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
+from .tasks import send_new_post_notification
 
 
 class NewsList(ListView):
@@ -94,7 +95,6 @@ class NewsCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     permission_required = ('news.add_post',)
 
     def get_form_kwargs(self):
-        """Передаем request в форму"""
         kwargs = super().get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs
@@ -111,6 +111,9 @@ class NewsCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
 
         self.object.save()
         form.save_m2m()
+
+        # Асинхронная отправка уведомлений подписчикам
+        send_new_post_notification.delay(self.object.id)
 
         return super().form_valid(form)
 
@@ -148,16 +151,19 @@ class ArticleCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        self.object.post_type = Post.ARTICLE
+        self.object.post_type = Post.NEWS
 
         if not self.request.user.groups.filter(name='authors').exists():
-            raise PermissionDenied("Только авторы могут создавать статьи")
+            raise PermissionDenied("Только авторы могут создавать новости")
 
         author, created = Author.objects.get_or_create(user=self.request.user)
         self.object.author = author
 
         self.object.save()
         form.save_m2m()
+
+        # Асинхронная отправка уведомлений подписчикам
+        send_new_post_notification.delay(self.object.id)
 
         return super().form_valid(form)
 
