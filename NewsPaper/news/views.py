@@ -1,4 +1,4 @@
-
+import logging
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.core.paginator import Paginator
@@ -17,6 +17,8 @@ from django.utils import timezone
 from datetime import timedelta
 from .tasks import send_new_post_notification
 
+logger = logging.getLogger('news')
+
 
 class NewsList(ListView):
     model = Post
@@ -28,6 +30,9 @@ class NewsList(ListView):
     def get_queryset(self):
         queryset = Post.objects.filter(post_type=Post.NEWS)
         self.filterset = NewsFilter(self.request.GET, queryset=queryset)
+        if self.request.GET.get('search'):
+            logger.info(f"Пользователь {self.request.user} выполнил поиск: {self.request.GET.get('search')}")
+
         return self.filterset.qs
 
     def get_context_data(self, **kwargs):
@@ -59,10 +64,9 @@ class NewsList(ListView):
             context['user_news_count'] = user_news_count
             context['user_articles_count'] = user_articles_count
 
+        logger.debug(f"Отображен список новостей. Пользователь: {self.request.user}")
         return context
 
-
-# Остальные представления остаются без изменений...
 class NewsSearch(ListView):
     model = Post
     ordering = '-created_at'
@@ -104,6 +108,7 @@ class NewsCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
         self.object.post_type = Post.NEWS
 
         if not self.request.user.groups.filter(name='authors').exists():
+            logger.warning(f"Пользователь {self.request.user} попытался создать новость без прав автора")
             raise PermissionDenied("Только авторы могут создавать новости")
 
         author, created = Author.objects.get_or_create(user=self.request.user)
@@ -112,10 +117,13 @@ class NewsCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
         self.object.save()
         form.save_m2m()
 
+        logger.info(f"Создана новость: {self.object.title} пользователем {self.request.user}")
+
         # Асинхронная отправка уведомлений подписчикам
         send_new_post_notification.delay(self.object.id)
 
         return super().form_valid(form)
+
 
 
 class NewsUpdate(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
@@ -195,10 +203,16 @@ def subscribe_to_category(request, category_id):
     if not Subscription.objects.filter(user=request.user, category=category).exists():
         Subscription.objects.create(user=request.user, category=category)
         messages.success(request, f'Вы успешно подписались на категорию "{category.name}"')
+        logger.info(f"Пользователь {request.user} подписался на категорию {category.name}")
     else:
         messages.info(request, f'Вы уже подписаны на категорию "{category.name}"')
+        logger.debug(f"Пользователь {request.user} уже подписан на категорию {category.name}")
 
     return redirect(request.META.get('HTTP_REFERER', 'news_list'))
+
+def custom_permission_denied(request, exception):
+    logger.warning(f"Ошибка доступа 403 для пользователя {request.user}: {exception}")
+    return render(request, '403.html', status=403)
 
 
 @login_required
@@ -236,5 +250,7 @@ def become_author(request):
 
         for permission in permissions:
             user.user_permissions.add(permission)
+
+        logger.info(f"Пользователь {user.username} стал автором")
 
     return redirect('/news/')

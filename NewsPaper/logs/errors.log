@@ -1,0 +1,9 @@
+2025-11-19 18:37:21,868 - ERROR - Это ERROR сообщение - ошибка - C:\Users\lory1\dev\news_portal\NewsPaper\NewsPaper\urls.py
+None
+2025-11-19 18:37:21,868 - ERROR - Это CRITICAL сообщение с ошибкой - C:\Users\lory1\dev\news_portal\NewsPaper\NewsPaper\urls.py
+(<class 'ZeroDivisionError'>, ZeroDivisionError('division by zero'), <traceback object at 0x000001E2464DB200>)
+Traceback (most recent call last):
+  File "C:\Users\lory1\dev\news_portal\NewsPaper\NewsPaper\urls.py", line 40, in test_logs
+    result = 1 / 0
+             ~~^~~
+ZeroDivisionError: division by zero
